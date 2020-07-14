@@ -34,9 +34,9 @@ class DemoJoin {
 
         // В этом случае метод isAlive() показывает, что
         // потоки исполнения еще исполняются, выдаст true.
-        System.out.println("Thread One started: " + ob1.t.isAlive());
-        System.out.println("Thread Two started: " + ob2.t.isAlive());
-        System.out.println("Thread Three started: " + ob3.t.isAlive());
+        System.out.println("Thread One is started: " + ob1.t.isAlive());
+        System.out.println("Thread Two is started: " + ob2.t.isAlive());
+        System.out.println("Thread Three is started: " + ob3.t.isAlive());
 
         // Ожидать завершения потоков исполнения
     try {
@@ -51,9 +51,9 @@ class DemoJoin {
     }
         // В этом случае метод isAlive() показывает, что
         // потоки исполнения завершены, выдаст false.
-        System.out.println("Thread One started: " + ob1.t.isAlive());
-        System.out.println("Thread Two started: " + ob2.t.isAlive());
-        System.out.println("Thread Three started: " + ob3.t.isAlive());
+        System.out.println("Thread One is completed: " + ob1.t.isAlive());
+        System.out.println("Thread Two is completed: " + ob2.t.isAlive());
+        System.out.println("Thread Three is completed: " + ob3.t.isAlive());
 
         System.out.println("The main thread is completed.");
     }
