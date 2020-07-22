@@ -18,7 +18,7 @@ public class ThreadsForWorkWithArr
             System.out.println("First stream life: " + (b - a));
         }
 
-        public synchronized void divisionGluingArr()
+        public synchronized void divisionArr()
         {
             float[] arr = new float[size];
             float[] a1 = new float[arr.length / 2];
@@ -45,7 +45,7 @@ public class ThreadsForWorkWithArr
         public void run()
         {
             createArr();
-            divisionGluingArr();
+            divisionArr();
         }
     }
 }
