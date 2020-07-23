@@ -40,7 +40,7 @@ public class SocketThread extends Thread {
             listener.onSocketStop(this);
         }
     }
-    // метод синхронизирован ,
+    // метод синхронизирован,
     // т.к. много клиентов может подключиться к серверу
     // и пользоваться этим методом
     public synchronized boolean sendMessage(String msg) {

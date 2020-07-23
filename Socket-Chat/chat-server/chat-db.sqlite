@@ -1,0 +1,7 @@
+CREATE TABLE users (login STRING PRIMARY KEY, password STRING, nickname STRING))
+
+INSERT INTO (login, password, nickname) VALUES ('Timur', '23134', 'tim-nick');
+INSERT INTO (login, password, nickname) VALUES ('feon', '1243', 'feon-nick');
+INSERT INTO (login, password, nickname) VALUES ('kjsi', '4664', 'kjsi-nick');
+INSERT INTO (login, password, nickname) VALUES ('gikra', '6892', 'gikra-nick');
+INSERT INTO (login, password, nickname) VALUES ('zioql', '5765', 'zioql-nick');

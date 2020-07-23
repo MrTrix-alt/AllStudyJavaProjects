@@ -1,5 +1,6 @@
 package ru.chat.client;
 
+import ru.chat.library.Library;
 import ru.chat.network.SocketThread;
 import ru.chat.network.SocketThreadListener;
 
@@ -10,6 +11,9 @@ import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 public class ClientGUI extends JFrame implements ActionListener, Thread.UncaughtExceptionHandler, SocketThreadListener {
 
@@ -33,6 +37,8 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
     private final JList<String> userList = new JList<>();
     private boolean shownIoErrors = false;
     private SocketThread socketThread;
+    private final DateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss: ");
+    private final String WINDOW_TITLE = "Chat";
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -49,9 +55,9 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
         setLocationRelativeTo(null);
         setSize(WIDTH, HEIGHT);
         setAlwaysOnTop(true);
-        userList.setListData(new String[]{"user1", "user2", "user3", "user4",
-                "user5", "user6", "user7", "user8", "user9",
-                "user-with-exceptionally-long-name-in-this-chat"});
+//        userList.setListData(new String[]{"user1", "user2", "user3", "user4",
+//                "user5", "user6", "user7", "user8", "user9",
+//                "user-with-exceptionally-long-name-in-this-chat"});
         JScrollPane scrUser = new JScrollPane(userList);
         JScrollPane scrLog = new JScrollPane(log);
         scrUser.setPreferredSize(new Dimension(100, 0));
@@ -89,6 +95,8 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
             sendMessage();
         } else if (src == btnLogin) {
             connect();
+        } else if (src == btnDisconnect) {
+            socketThread.close();
         } else {
             throw new RuntimeException("Unknown source:" + src);
         }
@@ -107,11 +115,10 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
     private void sendMessage() {
         String msg = tfMessage.getText();
         String username = tfLogin.getText();
-
         if ("".equals(msg)) return;
         tfMessage.setText(null);
         tfMessage.requestFocusInWindow();
-        socketThread.sendMessage(msg);
+        socketThread.sendMessage(Library.getTypeBcastClient(msg));
     }
 
     private void wrtMsgToLogFile(String msg, String username) {
@@ -173,15 +180,50 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
     @Override
     public void onSocketReady(SocketThread thread, Socket socket) {
         putLog("Ready");
+        panelBottom.setVisible(true);
+        panelTop.setVisible(false);
+        String login = tfLogin.getText();
+        String password = new String(tfPassword.getPassword());
+        thread.sendMessage(Library.getAuthRequest(login, password));
     }
 
     @Override
     public void onReceiveString(SocketThread thread, Socket socket, String msg) {
-        putLog(msg);
+        handleMessage(msg);
     }
 
     @Override
     public void onSocketException(SocketThread thread, Throwable throwable) {
         showException(thread, throwable);
+    }
+
+    private void handleMessage(String value) {
+        String[] arr = value.split(Library.DELIMITER);
+        String msgType = arr[0];
+        switch (msgType) {
+            case Library.AUTH_ACCEPT:
+                setTitle(WINDOW_TITLE + " authorized with nickname " + arr[1]);
+                break;
+            case Library.AUTH_DENIED:
+                putLog(value);
+                break;
+            case Library.MSG_FORMAT_ERROR:
+                putLog(value);
+                socketThread.close();
+                break;
+            case Library.TYPE_BROADCAST:
+                putLog(DATE_FORMAT.format(Long.parseLong(arr[1])) +
+                        arr[2] + ": " + arr[3]);
+                break;
+            case Library.USER_LIST:
+                String users = value.substring(Library.USER_LIST.length() +
+                        Library.DELIMITER.length());
+                String[] userArr = users.split(Library.DELIMITER);
+                Arrays.sort(userArr);
+                userList.setListData(userArr);
+                break;
+            default:
+                throw new RuntimeException("Unknown message type: " + value);
+        }
     }
 }
